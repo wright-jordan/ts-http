@@ -21,19 +21,19 @@ export function App(next: Handler): http.RequestListener {
   };
 }
 
-export function Mux(handlersCtx: Handlers, _404: Handler): Handler {
+export function Mux(handlers: Handlers, _404: Handler): Handler {
   return async function muxCtx(r, w, ctx) {
     const path = r.url;
     if (typeof path === "undefined") {
       await _404(r, w, ctx);
       return;
     }
-    const handlerCtx = handlersCtx[path];
-    if (typeof handlerCtx === "undefined") {
+    const handler = handlers[path];
+    if (typeof handler === "undefined") {
       await _404(r, w, ctx);
       return;
     }
-    await handlerCtx(r, w, ctx);
+    await handler(r, w, ctx);
   };
 }
 

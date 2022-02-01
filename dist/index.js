@@ -5,19 +5,19 @@ export function App(next) {
         next(r, w, ctx);
     };
 }
-export function Mux(handlersCtx, _404) {
+export function Mux(handlers, _404) {
     return async function muxCtx(r, w, ctx) {
         const path = r.url;
         if (typeof path === "undefined") {
             await _404(r, w, ctx);
             return;
         }
-        const handlerCtx = handlersCtx[path];
-        if (typeof handlerCtx === "undefined") {
+        const handler = handlers[path];
+        if (typeof handler === "undefined") {
             await _404(r, w, ctx);
             return;
         }
-        await handlerCtx(r, w, ctx);
+        await handler(r, w, ctx);
     };
 }
 class PayloadTooLargeError extends Error {
