@@ -9,7 +9,7 @@ export type Handlers = {
   [path: string]: AsyncRequestListener;
 };
 
-export type MiddleWare = (
+export type Middleware = (
   next: AsyncRequestListener
 ) => Promise<AsyncRequestListener>;
 
