@@ -1,12 +1,8 @@
 import http from "http";
 
-interface Ctx {}
+export interface Ctx {}
 
 export type Handler = (
-  r: http.IncomingMessage,
-  w: http.ServerResponse
-) => Promise<void>;
-export type HandlerCtx = (
   r: http.IncomingMessage,
   w: http.ServerResponse,
   ctx: Ctx
@@ -15,36 +11,17 @@ export type HandlerCtx = (
 export type Handlers = {
   [path: string]: Handler;
 };
-export type HandlersCtx = {
-  [path: string]: HandlerCtx;
-};
 
-export function useCtx(next: HandlerCtx): http.RequestListener {
+export type Middleware = (next: Handler) => Promise<Handler>;
+
+export function useCtx(next: Handler): http.RequestListener {
   return function (r, w) {
     const ctx: Ctx = {};
     next(r, w, ctx);
   };
 }
 
-export type Middleware = (next: Handler) => Promise<Handler>;
-export type MiddlewareCtx = (next: HandlerCtx) => Promise<HandlerCtx>;
-
-export function Mux(handlers: Handlers, _404: Handler): Handler {
-  return async function mux(r, w) {
-    const path = r.url;
-    if (typeof path === "undefined") {
-      await _404(r, w);
-      return;
-    }
-    const handler = handlers[path];
-    if (typeof handler === "undefined") {
-      await _404(r, w);
-      return;
-    }
-    await handler(r, w);
-  };
-}
-export function MuxCtx(handlersCtx: HandlersCtx, _404: HandlerCtx): HandlerCtx {
+export function Mux(handlersCtx: Handlers, _404: Handler): Handler {
   return async function muxCtx(r, w, ctx) {
     const path = r.url;
     if (typeof path === "undefined") {
