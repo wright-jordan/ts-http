@@ -14,7 +14,7 @@ export type Handlers = {
 
 export type Middleware = (next: Handler) => Promise<Handler>;
 
-export function useCtx(next: Handler): http.RequestListener {
+export function App(next: Handler): http.RequestListener {
   return function (r, w) {
     const ctx: Ctx = {};
     next(r, w, ctx);
