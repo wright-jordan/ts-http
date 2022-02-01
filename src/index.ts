@@ -1,12 +1,17 @@
 import http, { IncomingMessage, ServerResponse } from "http";
 
-export interface AsyncRequestListener {
-  (req: IncomingMessage, res: ServerResponse): Promise<void>;
-}
+export type AsyncRequestListener = (
+  req: IncomingMessage,
+  res: ServerResponse
+) => Promise<void>;
 
 export type Handlers = {
   [path: string]: AsyncRequestListener;
 };
+
+export type MiddleWare = (
+  next: AsyncRequestListener
+) => Promise<AsyncRequestListener>;
 
 export default function Mux(
   handlers: Handlers,
