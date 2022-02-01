@@ -1,34 +1,62 @@
-import http, { IncomingMessage, ServerResponse } from "http";
+import http from "http";
 
-export type AsyncRequestListener = (
-  req: IncomingMessage,
-  res: ServerResponse
+interface Ctx {}
+
+export type Handler = (
+  r: http.IncomingMessage,
+  w: http.ServerResponse
+) => Promise<void>;
+export type HandlerCtx = (
+  r: http.IncomingMessage,
+  w: http.ServerResponse,
+  ctx: Ctx
 ) => Promise<void>;
 
 export type Handlers = {
-  [path: string]: AsyncRequestListener;
+  [path: string]: Handler;
+};
+export type HandlersCtx = {
+  [path: string]: HandlerCtx;
 };
 
-export type Middleware = (
-  next: AsyncRequestListener
-) => Promise<AsyncRequestListener>;
+export function useCtx(next: HandlerCtx): http.RequestListener {
+  return function (r, w) {
+    const ctx: Ctx = {};
+    next(r, w, ctx);
+  };
+}
 
-export default function Mux(
-  handlers: Handlers,
-  _404: AsyncRequestListener
-): AsyncRequestListener {
-  return async function mux(req: IncomingMessage, res: ServerResponse) {
-    const path = req.url;
+export type Middleware = (next: Handler) => Promise<Handler>;
+export type MiddlewareCtx = (next: HandlerCtx) => Promise<HandlerCtx>;
+
+export function Mux(handlers: Handlers, _404: Handler): Handler {
+  return async function mux(r, w) {
+    const path = r.url;
     if (typeof path === "undefined") {
-      await _404(req, res);
+      await _404(r, w);
       return;
     }
     const handler = handlers[path];
     if (typeof handler === "undefined") {
-      await _404(req, res);
+      await _404(r, w);
       return;
     }
-    await handler(req, res);
+    await handler(r, w);
+  };
+}
+export function MuxCtx(handlersCtx: HandlersCtx, _404: HandlerCtx): HandlerCtx {
+  return async function muxCtx(r, w, ctx) {
+    const path = r.url;
+    if (typeof path === "undefined") {
+      await _404(r, w, ctx);
+      return;
+    }
+    const handlerCtx = handlersCtx[path];
+    if (typeof handlerCtx === "undefined") {
+      await _404(r, w, ctx);
+      return;
+    }
+    await handlerCtx(r, w, ctx);
   };
 }
 
@@ -39,25 +67,25 @@ class PayloadTooLargeError extends Error {
 }
 
 export async function readBuf(
-  req: IncomingMessage,
+  r: http.IncomingMessage,
   options: { maxBytes: number } = { maxBytes: 16384 }
 ): Promise<Buffer> {
   const buf: Buffer[] = [];
   let byteCount = 0;
   return new Promise((resolve, reject) => {
-    req.on("error", (err) => {
+    r.on("error", (err) => {
       reject(err);
       return;
     });
-    req.on("data", (chunk: Buffer) => {
+    r.on("data", (chunk: Buffer) => {
       byteCount += chunk.byteLength;
       if (byteCount > options.maxBytes) {
-        req.destroy(new PayloadTooLargeError());
+        r.destroy(new PayloadTooLargeError());
         return;
       }
       buf.push(chunk);
     });
-    req.on("end", () => {
+    r.on("end", () => {
       resolve(Buffer.concat(buf));
       return;
     });
@@ -65,7 +93,7 @@ export async function readBuf(
 }
 
 export async function readStr(
-  req: IncomingMessage,
+  r: http.IncomingMessage,
   options: { encoding: BufferEncoding; maxChunks: number } = {
     encoding: "utf-8",
     maxChunks: 1,
@@ -74,20 +102,20 @@ export async function readStr(
   let str = "";
   let chunkCount = 0;
   return new Promise((resolve, reject) => {
-    req.setEncoding(options.encoding);
-    req.on("error", (err) => {
+    r.setEncoding(options.encoding);
+    r.on("error", (err) => {
       reject(err);
       return;
     });
-    req.on("data", (chunk: string) => {
+    r.on("data", (chunk: string) => {
       chunkCount += 1;
       if (chunkCount > options.maxChunks) {
-        req.destroy(new PayloadTooLargeError());
+        r.destroy(new PayloadTooLargeError());
         return;
       }
       str += chunk;
     });
-    req.on("end", () => {
+    r.on("end", () => {
       resolve(str);
       return;
     });
