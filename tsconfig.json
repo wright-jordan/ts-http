@@ -30,6 +30,5 @@
 
     /* Completeness */
     "skipLibCheck": true
-  },
-  "exclude": ["src/example.ts"]
+  }
 }
