@@ -1,0 +1,34 @@
+{
+  "compilerOptions": {
+    /* Visit https://aka.ms/tsconfig.json to read more about this file */
+
+    /* Projects */
+
+    /* Language and Environment */
+    "target": "es2020",
+    "lib": ["es2020"],
+
+    /* Modules */
+    "module": "es2022",
+    "moduleResolution": "node",
+    "rootDirs": ["./src"],
+
+    /* JavaScript Support */
+    "allowJs": false,
+
+    /* Emit */
+    "outDir": "./dist",
+    "removeComments": true,
+    "declaration": true,
+
+    /* Interop Constraints */
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+
+    /* Type Checking */
+    "strict": true,
+
+    /* Completeness */
+    "skipLibCheck": true
+  }
+}
