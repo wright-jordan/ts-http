@@ -1,14 +1,15 @@
 {
   "name": "mux",
   "version": "1.0.0",
-  "description": "",
   "main": "dist/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "rm -r dist || true && tsc"
   },
-  "type": "module",
-  "author": "Jordan Wright",
+  "keywords": [],
+  "author": "",
   "license": "ISC",
+  "description": "",
+  "type": "module",
   "devDependencies": {
     "@types/node": "^17.0.13",
     "typescript": "^4.5.5"

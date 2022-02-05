@@ -22,7 +22,7 @@ export function App(next: Handler): http.RequestListener {
 }
 
 export function Mux(handlers: Handlers, _404: Handler): Handler {
-  return async function muxCtx(r, w, ctx) {
+  return async function mux(r, w, ctx) {
     const path = r.url;
     if (typeof path === "undefined") {
       await _404(r, w, ctx);
@@ -43,7 +43,7 @@ class PayloadTooLargeError extends Error {
   }
 }
 
-export async function readBuf(
+export async function read(
   r: http.IncomingMessage,
   options: { maxBytes: number } = { maxBytes: 16384 }
 ): Promise<Buffer> {
@@ -64,36 +64,6 @@ export async function readBuf(
     });
     r.on("end", () => {
       resolve(Buffer.concat(buf));
-      return;
-    });
-  });
-}
-
-export async function readStr(
-  r: http.IncomingMessage,
-  options: { encoding: BufferEncoding; maxChunks: number } = {
-    encoding: "utf-8",
-    maxChunks: 1,
-  }
-): Promise<string> {
-  let str = "";
-  let chunkCount = 0;
-  return new Promise((resolve, reject) => {
-    r.setEncoding(options.encoding);
-    r.on("error", (err) => {
-      reject(err);
-      return;
-    });
-    r.on("data", (chunk: string) => {
-      chunkCount += 1;
-      if (chunkCount > options.maxChunks) {
-        r.destroy(new PayloadTooLargeError());
-        return;
-      }
-      str += chunk;
-    });
-    r.on("end", () => {
-      resolve(str);
       return;
     });
   });
