@@ -9,10 +9,6 @@ export declare type Handlers = {
 export declare type Middleware = (next: Handler) => Promise<Handler>;
 export declare function App(next: Handler): http.RequestListener;
 export declare function Mux(handlers: Handlers, _404: Handler): Handler;
-export declare function readBuf(r: http.IncomingMessage, options?: {
+export declare function read(r: http.IncomingMessage, options?: {
     maxBytes: number;
 }): Promise<Buffer>;
-export declare function readStr(r: http.IncomingMessage, options?: {
-    encoding: BufferEncoding;
-    maxChunks: number;
-}): Promise<string>;
