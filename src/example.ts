@@ -11,12 +11,12 @@ declare module "mux" {
 
 const _404: Handler = async function (r, w, ctx) {
   w.statusCode = 404;
-  w.end(JSON.stringify({ message: http.STATUS_CODES[404] }));
+  w.write(JSON.stringify({ message: http.STATUS_CODES[404] }));
 };
 
 const handler: Handler = async function (r, w, ctx) {
   console.log(ctx);
-  w.end(JSON.stringify({ hello: "world" }));
+  w.write(JSON.stringify({ hello: "world" }));
 };
 
 const handlers: Handlers = {
