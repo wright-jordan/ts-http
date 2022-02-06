@@ -1,8 +1,9 @@
 import http from "http";
 export function App(next) {
-    return function (r, w) {
+    return async function (r, w) {
         const ctx = {};
-        next(r, w, ctx);
+        await next(r, w, ctx);
+        w.end();
     };
 }
 export function Mux(handlers, _404) {

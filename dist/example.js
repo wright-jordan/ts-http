@@ -2,11 +2,11 @@ import { Mux, App } from "mux";
 import http from "http";
 const _404 = async function (r, w, ctx) {
     w.statusCode = 404;
-    w.end(JSON.stringify({ message: http.STATUS_CODES[404] }));
+    w.write(JSON.stringify({ message: http.STATUS_CODES[404] }));
 };
 const handler = async function (r, w, ctx) {
     console.log(ctx);
-    w.end(JSON.stringify({ hello: "world" }));
+    w.write(JSON.stringify({ hello: "world" }));
 };
 const handlers = {
     "/": handler,
