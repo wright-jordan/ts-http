@@ -1,4 +1,4 @@
-import http from "http";
+import { ReasonPhrases } from "http-status-codes";
 export function App(next) {
     return async function (r, w) {
         const ctx = {};
@@ -22,7 +22,7 @@ export function Mux(handlers, _404) {
 }
 class PayloadTooLargeError extends Error {
     constructor() {
-        super(http.STATUS_CODES[413]);
+        super(ReasonPhrases.REQUEST_TOO_LONG);
     }
 }
 export async function read(r, options = { maxBytes: 16384 }) {
