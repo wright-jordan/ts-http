@@ -1,5 +1,5 @@
 import http from "http";
-import { ReasonPhrases } from "http-status-codes";
+import { StatusCodes } from "http-status-codes";
 
 export interface Ctx {}
 
@@ -40,7 +40,7 @@ export function Mux(handlers: Handlers, _404: Handler): Handler {
 
 class PayloadTooLargeError extends Error {
   constructor() {
-    super(ReasonPhrases.REQUEST_TOO_LONG);
+    super(http.STATUS_CODES[StatusCodes.REQUEST_TOO_LONG]);
   }
 }
 
