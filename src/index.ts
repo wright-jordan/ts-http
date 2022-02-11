@@ -1,5 +1,4 @@
 import http from "http";
-import { StatusCodes } from "http-status-codes";
 
 export interface Ctx {}
 
@@ -15,10 +14,10 @@ export type Handlers = {
 
 export type Middleware = (next: Handler) => Promise<Handler>;
 
-export function App(next: Handler): http.RequestListener {
+export function App(mux: Handler): http.RequestListener {
   return async function (r, w) {
     const ctx: Ctx = {};
-    await next(r, w, ctx);
+    await mux(r, w, ctx);
   };
 }
 
@@ -40,7 +39,7 @@ export function Mux(handlers: Handlers, _404: Handler): Handler {
 
 class PayloadTooLargeError extends Error {
   constructor() {
-    super(http.STATUS_CODES[StatusCodes.REQUEST_TOO_LONG]);
+    super(http.STATUS_CODES[413]);
   }
 }
 
@@ -53,7 +52,6 @@ export async function read(
   return new Promise((resolve, reject) => {
     r.on("error", (err) => {
       reject(err);
-      return;
     });
     r.on("data", (chunk: Buffer) => {
       byteCount += chunk.byteLength;
@@ -65,7 +63,6 @@ export async function read(
     });
     r.on("end", () => {
       resolve(Buffer.concat(buf));
-      return;
     });
   });
 }

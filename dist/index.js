@@ -1,8 +1,8 @@
-import { ReasonPhrases } from "http-status-codes";
-export function App(next) {
+import http from "http";
+export function App(mux) {
     return async function (r, w) {
         const ctx = {};
-        await next(r, w, ctx);
+        await mux(r, w, ctx);
     };
 }
 export function Mux(handlers, _404) {
@@ -22,7 +22,7 @@ export function Mux(handlers, _404) {
 }
 class PayloadTooLargeError extends Error {
     constructor() {
-        super(ReasonPhrases.REQUEST_TOO_LONG);
+        super(http.STATUS_CODES[413]);
     }
 }
 export async function read(r, options = { maxBytes: 16384 }) {
@@ -31,7 +31,6 @@ export async function read(r, options = { maxBytes: 16384 }) {
     return new Promise((resolve, reject) => {
         r.on("error", (err) => {
             reject(err);
-            return;
         });
         r.on("data", (chunk) => {
             byteCount += chunk.byteLength;
@@ -43,7 +42,6 @@ export async function read(r, options = { maxBytes: 16384 }) {
         });
         r.on("end", () => {
             resolve(Buffer.concat(buf));
-            return;
         });
     });
 }
