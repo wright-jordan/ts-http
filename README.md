@@ -46,7 +46,7 @@ const mw: Middleware = async function (next) {
 };
 ```
 
-4. Pass your `Handlers` and `_404: Handler` to `Mux()`.
+4. Pass your `Handlers` and 404 `Handler` to `Mux()`.
 
 ```
 const mux = Mux(handlers, _404);
