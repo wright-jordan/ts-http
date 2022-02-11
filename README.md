@@ -1,10 +1,10 @@
-# node-mux
+# ts-mux
 
 A small collection of functions and types that provide a simple routing mechanism and middleware pattern.
 
 ## Installation
 
-`npm i wright-jordan/node-mux`
+`npm i wright-jordan/ts-mux`
 
 ## Getting Started
 
