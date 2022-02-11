@@ -1,6 +1,6 @@
 # node-mux
 
-A zero-dependency small collection of functions and types that provide a simple routing mechanism and middleware pattern.
+A small collection of functions and types that provide a simple routing mechanism and middleware pattern.
 
 ## Installation
 
