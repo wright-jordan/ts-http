@@ -6,7 +6,7 @@
 
 ## Getting Started
 
-1. `import {/* */} from 'mux';`
+1. `import { App, Handler, Handlers, Middleware, Mux } from 'mux';`
 
 2. Create `Handler` functions to populate a `Handlers` object.
 
