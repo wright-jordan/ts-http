@@ -60,13 +60,13 @@ const mw: Middleware = async function (next) {
 const mux = Mux(handlers, _404);
 ```
 
-6. The generated value is a special `Handler` that should be wrapped in `Middleware` and passed to `App()`.
+6. `Mux()` returns a special `Handler` that should be wrapped in `Middleware` and passed to `App()`.
 
 ```
 const app = App(await mw(mux));
 ```
 
-7. The generated value is an `http.RequestListener` can be passed to `http.createServer()` to initialize your server.
+7. `App()` returns an `http.RequestListener` that be passed to `http.createServer()`.
 
 ```
 const server = http.createServer(app);
