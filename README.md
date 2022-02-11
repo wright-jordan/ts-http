@@ -4,11 +4,11 @@
 
 `npm i wright-jordan/node-mux`
 
-`import {/* */} from 'mux';`
-
 ## Getting Started
 
-1. Create `Handler` functions to populate a `Handlers` object.
+1. `import {/* */} from 'mux';`
+
+2. Create `Handler` functions to populate a `Handlers` object.
 
 ```
 const handler: Handler = async function (r, w, ctx) {
@@ -21,7 +21,7 @@ const handlers: Handlers = {
 };
 ```
 
-2. Create a 404 `Handler`.
+3. Create a 404 `Handler`.
 
 ```
 const _404: Handler = async function (r, w, ctx) {
@@ -30,7 +30,7 @@ const _404: Handler = async function (r, w, ctx) {
 };
 ```
 
-3. Create `Middleware`.
+4. Create `Middleware`.
 
 ```
 declare module "mux" {
@@ -52,19 +52,19 @@ const mw: Middleware = async function (next) {
 };
 ```
 
-4. Pass your `Handlers` and 404 `Handler` to `Mux()`.
+5. Pass your `Handlers` and 404 `Handler` to `Mux()`.
 
 ```
 const mux = Mux(handlers, _404);
 ```
 
-5. The generated value is a special `Handler` that should be wrapped in `Middleware` and passed to `App()`.
+6. The generated value is a special `Handler` that should be wrapped in `Middleware` and passed to `App()`.
 
 ```
 const app = App(await mw(mux));
 ```
 
-6. The generated value is an `http.RequestListener` can be passed to `http.createServer()` to initialize your server.
+7. The generated value is an `http.RequestListener` can be passed to `http.createServer()` to initialize your server.
 
 ```
 const server = http.createServer(app);
