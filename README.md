@@ -1,5 +1,11 @@
 # node-mux
 
+## Installation
+
+`npm i wright-jordan/node-mux`
+
+`import {/* */} from 'mux';`
+
 ## Getting Started
 
 1. Create `Handler` functions to populate a `Handlers` object.
