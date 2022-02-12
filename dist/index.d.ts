@@ -1,10 +1,12 @@
 /// <reference types="node" />
 import http from "http";
 import { parse, serialize } from "cookie";
+import { StatusCodes } from "http-status-codes";
 export declare const cookie: {
     parse: typeof parse;
     serialize: typeof serialize;
 };
+export { StatusCodes };
 export interface Ctx {
 }
 export declare type Handler = (r: http.IncomingMessage, w: http.ServerResponse, ctx: Ctx) => Promise<void>;
