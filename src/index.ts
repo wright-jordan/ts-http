@@ -1,7 +1,9 @@
 import http from "http";
-import cookie from "cookie";
+import { parse, serialize } from "cookie";
+import { StatusCodes } from "http-status-codes";
 
-export { cookie };
+export const cookie = { parse, serialize };
+export { StatusCodes };
 
 export interface Ctx {}
 

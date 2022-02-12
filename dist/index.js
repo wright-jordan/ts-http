@@ -1,6 +1,6 @@
 import http from "http";
-import cookie from "cookie";
-export { cookie };
+import { parse, serialize } from "cookie";
+export const cookie = { parse, serialize };
 export function App(mux) {
     return async function (r, w) {
         const ctx = {};
