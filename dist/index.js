@@ -1,8 +1,4 @@
 import http from "http";
-import { parse, serialize } from "cookie";
-import { StatusCodes } from "http-status-codes";
-export const cookie = { parse, serialize };
-export { StatusCodes };
 export function App(mux) {
     return async function (r, w) {
         const ctx = {};
