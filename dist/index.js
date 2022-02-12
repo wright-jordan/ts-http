@@ -29,9 +29,7 @@ export async function read(r, options = { maxBytes: 16384 }) {
     const buf = [];
     let byteCount = 0;
     return new Promise((resolve, reject) => {
-        r.on("error", (err) => {
-            reject(err);
-        });
+        r.on("error", reject);
         r.on("data", (chunk) => {
             byteCount += chunk.byteLength;
             if (byteCount > options.maxBytes) {
