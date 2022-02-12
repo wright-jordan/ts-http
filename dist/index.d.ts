@@ -1,5 +1,7 @@
 /// <reference types="node" />
 import http from "http";
+import cookie from "cookie";
+export { cookie };
 export interface Ctx {
 }
 export declare type Handler = (r: http.IncomingMessage, w: http.ServerResponse, ctx: Ctx) => Promise<void>;
