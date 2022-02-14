@@ -81,8 +81,8 @@ Example:
 
 ```
 const handlerPOST: Handler = async function (r, w, ctx) {
-  const bodyBuffer = await read(r);
-  const bodyJSON = JSON.parse(bodyBuffer.toString());
+  const buf = await read(r);
+  const body = JSON.parse(buf.toString());
   w.end();
 }
 ```
