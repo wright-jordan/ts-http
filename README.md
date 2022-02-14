@@ -66,7 +66,7 @@ const mux = Mux(handlers, _404);
 const app = App(await mw(mux));
 ```
 
-7. `App()` returns an `http.RequestListener` that be passed to `http.createServer()`.
+7. `App()` returns an `http.RequestListener` that can be passed to `http.createServer()`.
 
 ```
 const server = http.createServer(app);
