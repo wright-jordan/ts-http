@@ -17,11 +17,24 @@ export interface Handlers {
 export interface Middleware {
     (next: Handler): Handler;
 }
+/**
+ * Returns a router {@link Handler} that can be passed to {@link makeListener}. Can optionally be wrapped with middleware.
+ * @throws `never`
+ */
 export declare function makeRouter(handlers: Handlers): Handler;
+/**
+ * Accepts a router, router wrapped with middleware, or any {@link Handler}, and returns an {@link http.RequestListener}.
+ * @throws `never`
+ */
 export declare function makeListener(router: Handler): http.RequestListener;
 export declare class PayloadTooLargeError extends Error {
     constructor();
 }
+/**
+ * Reads the request body.
+ * @throws {@link PayloadTooLargeError}
+ * @throws `unknown`
+ */
 export declare function read(ctx: Context, options?: {
     maxBytes: number;
 }): Promise<Buffer>;

@@ -1,8 +1,16 @@
+/**
+ * Returns a router {@link Handler} that can be passed to {@link makeListener}. Can optionally be wrapped with middleware.
+ * @throws `never`
+ */
 export function makeRouter(handlers) {
     return async function router(ctx) {
         await (handlers[ctx.r.url] || handlers["404"])(ctx);
     };
 }
+/**
+ * Accepts a router, router wrapped with middleware, or any {@link Handler}, and returns an {@link http.RequestListener}.
+ * @throws `never`
+ */
 export function makeListener(router) {
     return async function listener(r, w) {
         const ctx = { r, w, cookies: [] };
@@ -22,6 +30,11 @@ export class PayloadTooLargeError extends Error {
         super();
     }
 }
+/**
+ * Reads the request body.
+ * @throws {@link PayloadTooLargeError}
+ * @throws `unknown`
+ */
 export async function read(ctx, options = { maxBytes: 16384 }) {
     const buf = [];
     let byteCount = 0;

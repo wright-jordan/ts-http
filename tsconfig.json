@@ -18,7 +18,6 @@
 
     /* Emit */
     "outDir": "./dist",
-    "removeComments": true,
     "declaration": true,
 
     /* Interop Constraints */
