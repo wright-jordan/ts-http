@@ -38,17 +38,18 @@ const handlers: Handlers = {
 const useMiddleware: Middleware = function useMiddleware(next) {
   return async function middleware(ctx) {
     ctx.msg = "hello world";
-    ctx.cookies.push("cookie1=value1");
+    ctx.cookies.push("name=value");
+    console.log("runs first");
     await next(ctx);
-    ctx.cookies.push("cookie4=value4");
+    console.log("runs fourth");
   };
 };
 
 const useAnotherMiddleware: Middleware = function useAnotherMiddleware(next) {
   return async function anotherMiddleware(ctx) {
-    ctx.cookies.push("cookie2=value2");
+    console.log("runs second");
     await next(ctx);
-    ctx.cookies.push("cookie3=value3");
+    console.log("runds third");
     console.log(ctx.msg);
   };
 };
