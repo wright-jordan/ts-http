@@ -1,65 +1,87 @@
 import http from "http";
 
-export interface Ctx {}
+export interface Context {
+  status?: number;
+  reply?: Buffer | Uint8Array | string;
+  cookies: string[];
+  r: http.IncomingMessage;
+  w: http.ServerResponse;
+}
 
-export type Handler = (
-  r: http.IncomingMessage,
-  w: http.ServerResponse,
-  ctx: Ctx
-) => Promise<void>;
+export interface Handler {
+  (ctx: Context): Promise<void>;
+}
 
-export type Handlers = {
+export interface Handlers {
   [path: string]: Handler;
-};
+  "404": Handler;
+}
 
-export type Middleware = (next: Handler) => Promise<Handler>;
+export interface Middleware {
+  (next: Handler): Handler;
+}
 
-export function App(mux: Handler): http.RequestListener {
-  return async function (r, w) {
-    const ctx: Ctx = {};
-    await mux(r, w, ctx);
+/**
+ * Returns a router {@link Handler} that can be passed to {@link makeListener}. Can optionally be wrapped with middleware.
+ * @throws `never`
+ */
+export function makeRouter(handlers: Handlers): Handler {
+  return async function router(ctx) {
+    await (handlers[ctx.r.url!] || handlers["404"])(ctx);
   };
 }
 
-export function Mux(handlers: Handlers, _404: Handler): Handler {
-  return async function mux(r, w, ctx) {
-    const path = r.url;
-    if (typeof path === "undefined") {
-      await _404(r, w, ctx);
+/**
+ * Accepts a router, router wrapped with middleware, or any {@link Handler}, and returns an {@link http.RequestListener}.
+ * @throws `never`
+ */
+export function makeListener(router: Handler): http.RequestListener {
+  return async function listener(r, w) {
+    const ctx: Context = { r, w, cookies: [] };
+
+    await router(ctx);
+
+    if (w.headersSent) {
       return;
     }
-    const handler = handlers[path];
-    if (typeof handler === "undefined") {
-      await _404(r, w, ctx);
-      return;
+    if (ctx.cookies.length > 0) {
+      w.setHeader("Set-Cookie", ctx.cookies);
     }
-    await handler(r, w, ctx);
+    w.statusCode = ctx.status || 200;
+    w.end(ctx.reply);
   };
 }
 
-class PayloadTooLargeError extends Error {
+export class PayloadTooLargeError extends Error {
   constructor() {
-    super(http.STATUS_CODES[413]);
+    super();
   }
 }
 
+/**
+ * Reads the request body.
+ * @throws {@link PayloadTooLargeError}
+ * @throws `unknown`
+ */
 export async function read(
-  r: http.IncomingMessage,
+  ctx: Context,
   options: { maxBytes: number } = { maxBytes: 16384 }
 ): Promise<Buffer> {
   const buf: Buffer[] = [];
   let byteCount = 0;
   return new Promise((resolve, reject) => {
-    r.on("error", reject);
-    r.on("data", (chunk: Buffer) => {
+    ctx.r.on("error", reject);
+    ctx.r.on("data", (chunk: Buffer) => {
       byteCount += chunk.byteLength;
       if (byteCount > options.maxBytes) {
-        r.destroy(new PayloadTooLargeError());
+        ctx.w.statusCode = 413;
+        ctx.w.end();
+        ctx.r.destroy(new PayloadTooLargeError());
         return;
       }
       buf.push(chunk);
     });
-    r.on("end", () => {
+    ctx.r.on("end", () => {
       resolve(Buffer.concat(buf));
     });
   });

@@ -1,14 +1,27 @@
 /// <reference types="node" />
 import http from "http";
-export interface Ctx {
+export interface Context {
+    status?: number;
+    reply?: Buffer | Uint8Array | string;
+    cookies: string[];
+    r: http.IncomingMessage;
+    w: http.ServerResponse;
 }
-export declare type Handler = (r: http.IncomingMessage, w: http.ServerResponse, ctx: Ctx) => Promise<void>;
-export declare type Handlers = {
+export interface Handler {
+    (ctx: Context): Promise<void>;
+}
+export interface Handlers {
     [path: string]: Handler;
-};
-export declare type Middleware = (next: Handler) => Promise<Handler>;
-export declare function App(mux: Handler): http.RequestListener;
-export declare function Mux(handlers: Handlers, _404: Handler): Handler;
-export declare function read(r: http.IncomingMessage, options?: {
+    "404": Handler;
+}
+export interface Middleware {
+    (next: Handler): Handler;
+}
+export declare function makeRouter(handlers: Handlers): Handler;
+export declare function makeListener(router: Handler): http.RequestListener;
+export declare class PayloadTooLargeError extends Error {
+    constructor();
+}
+export declare function read(ctx: Context, options?: {
     maxBytes: number;
 }): Promise<Buffer>;

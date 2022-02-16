@@ -1,104 +1,58 @@
-# ts-mux
+# ts-http
 
 A small collection of functions and types that provide a simple routing mechanism and middleware pattern.
 
-## Installation
+## API
 
-`npm i wright-jordan/ts-mux`
-
-## Getting Started
-
-1. `import { App, Handler, Handlers, Middleware, Mux } from 'mux';`
-
-2. Create `Handler` functions to populate a `Handlers` object.
+### Types
 
 ```
-const handler: Handler = async function (r, w, ctx) {
-  w.statusCode = 200;
-  w.end(JSON.stringify({ hello: "world" }));
-};
-
-const handlers: Handlers = {
-  "/": handler,
-};
-```
-
-3. Create a 404 `Handler`.
-
-```
-const _404: Handler = async function (r, w, ctx) {
-  w.statusCode = 404;
-  w.end();
-};
-```
-
-4. Create `Middleware`.
-
-```
-declare module "mux" {
-  interface Ctx {
-    data?: string;
-  }
-}
-
-const mw: Middleware = async function (next) {
-  return async function (r, w, ctx) {
-    console.log("I run before the handler.")
-
-    ctx.data = "I am accessible in future middleware and in the handler.";
-
-    await next(r, w, ctx);
-
-    console.log("I run after the handler.")
-  };
-};
-```
-
-5. Pass your `Handlers` and 404 `Handler` to `Mux()`.
-
-```
-const mux = Mux(handlers, _404);
-```
-
-6. `Mux()` returns a special `Handler` that should be wrapped in `Middleware` and passed to `App()`.
-
-```
-const app = App(await mw(mux));
-```
-
-7. `App()` returns an `http.RequestListener` that be passed to `http.createServer()`.
-
-```
-const server = http.createServer(app);
-server.listen(3000);
-```
-
-## Utilities
-
-- `function read(r: http.IncomingMessage, options?: { maxBytes: number; }): Promise<Buffer>;`
-
-Example:
-
-```
-const handlerPOST: Handler = async function (r, w, ctx) {
-  const bodyBuffer = await read(r);
-  const bodyJSON = JSON.parse(bodyBuffer.toString());
-  w.end();
+interface Context {
+    status?: number;
+    reply?: Buffer | Uint8Array | string;
+    cookies: string[];
+    r: http.IncomingMessage;
+    w: http.ServerResponse;
 }
 ```
 
-## API Reference
+```
+interface Handler {
+    (ctx: Context): Promise<void>;
+}
+```
 
-`interface Ctx {}`
+```
+interface Handlers {
+    [path: string]: Handler;
+    "404": Handler;
+}
+```
 
-`type Handler = (r: http.IncomingMessage, w: http.ServerResponse, ctx: Ctx) => Promise<void>;`
+```
+interface Middleware {
+    (next: Handler): Handler;
+}
+```
 
-`type Handlers = { [path: string]: Handler; };`
+### Functions
 
-`type Middleware = (next: Handler) => Promise<Handler>;`
+```
+function makeRouter(handlers: Handlers): Handler;
+```
 
-`function App(mux: Handler): http.RequestListener;`
+```
+function makeListener(app: Handler): http.RequestListener;
+```
 
-`function Mux(handlers: Handlers, _404: Handler): Handler;`
+```
+function read(ctx: Context, options?: { maxBytes: number; }): Promise<Buffer>;
+```
 
-`function read(r: http.IncomingMessage, options?: { maxBytes: number; }): Promise<Buffer>;`
+### Errors
+
+```
+class PayloadTooLargeError extends Error {
+    constructor();
+}
+```

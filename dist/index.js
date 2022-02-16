@@ -1,44 +1,43 @@
-import http from "http";
-export function App(mux) {
-    return async function (r, w) {
-        const ctx = {};
-        await mux(r, w, ctx);
+export function makeRouter(handlers) {
+    return async function router(ctx) {
+        await (handlers[ctx.r.url] || handlers["404"])(ctx);
     };
 }
-export function Mux(handlers, _404) {
-    return async function mux(r, w, ctx) {
-        const path = r.url;
-        if (typeof path === "undefined") {
-            await _404(r, w, ctx);
+export function makeListener(router) {
+    return async function listener(r, w) {
+        const ctx = { r, w, cookies: [] };
+        await router(ctx);
+        if (w.headersSent) {
             return;
         }
-        const handler = handlers[path];
-        if (typeof handler === "undefined") {
-            await _404(r, w, ctx);
-            return;
+        if (ctx.cookies.length > 0) {
+            w.setHeader("Set-Cookie", ctx.cookies);
         }
-        await handler(r, w, ctx);
+        w.statusCode = ctx.status || 200;
+        w.end(ctx.reply);
     };
 }
-class PayloadTooLargeError extends Error {
+export class PayloadTooLargeError extends Error {
     constructor() {
-        super(http.STATUS_CODES[413]);
+        super();
     }
 }
-export async function read(r, options = { maxBytes: 16384 }) {
+export async function read(ctx, options = { maxBytes: 16384 }) {
     const buf = [];
     let byteCount = 0;
     return new Promise((resolve, reject) => {
-        r.on("error", reject);
-        r.on("data", (chunk) => {
+        ctx.r.on("error", reject);
+        ctx.r.on("data", (chunk) => {
             byteCount += chunk.byteLength;
             if (byteCount > options.maxBytes) {
-                r.destroy(new PayloadTooLargeError());
+                ctx.w.statusCode = 413;
+                ctx.w.end();
+                ctx.r.destroy(new PayloadTooLargeError());
                 return;
             }
             buf.push(chunk);
         });
-        r.on("end", () => {
+        ctx.r.on("end", () => {
             resolve(Buffer.concat(buf));
         });
     });

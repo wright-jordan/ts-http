@@ -31,5 +31,5 @@
     /* Completeness */
     "skipLibCheck": true
   },
-  "exclude": ["dist/**/*"]
+  "exclude": ["dist/**/*", "src/example.ts"]
 }
