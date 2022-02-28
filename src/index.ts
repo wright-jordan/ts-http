@@ -4,7 +4,6 @@ import {
   RequestListener,
   createServer,
 } from "http";
-import { cpus } from "os";
 import cluster, { Cluster } from "cluster";
 
 export interface Context {
@@ -62,14 +61,14 @@ export function makeListener(router: Handler): RequestListener {
 interface ManageClusterFunction {
   (cluster: Cluster): void;
 }
-export function listen(
+export function listenHTTP(
   listener: RequestListener,
   port: number,
+  threadCount: number,
   fn: ManageClusterFunction
 ) {
   if (cluster.isPrimary) {
-    const numCpus = cpus().length;
-    for (let i = 0; i < numCpus; i++) {
+    for (let i = 0; i < threadCount; i++) {
       cluster.fork();
     }
     fn(cluster);
