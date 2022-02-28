@@ -1,11 +1,18 @@
-import http from "http";
+import {
+  IncomingMessage,
+  ServerResponse,
+  RequestListener,
+  createServer,
+} from "http";
+import { cpus } from "os";
+import cluster, { Cluster } from "cluster";
 
 export interface Context {
   status?: number;
   reply?: Buffer | Uint8Array | string;
   cookies: string[];
-  r: http.IncomingMessage;
-  w: http.ServerResponse;
+  r: IncomingMessage;
+  w: ServerResponse;
 }
 
 export interface Handler {
@@ -35,7 +42,7 @@ export function makeRouter(handlers: Handlers): Handler {
  * Accepts a router, router wrapped with middleware, or any {@link Handler}, and returns an {@link http.RequestListener}.
  * @throws `never`
  */
-export function makeListener(router: Handler): http.RequestListener {
+export function makeListener(router: Handler): RequestListener {
   return async function listener(r, w) {
     const ctx: Context = { r, w, cookies: [] };
 
@@ -50,6 +57,25 @@ export function makeListener(router: Handler): http.RequestListener {
     w.statusCode = ctx.status || 200;
     w.end(ctx.reply);
   };
+}
+
+interface ManageClusterFunction {
+  (cluster: Cluster): void;
+}
+export function listen(
+  listener: RequestListener,
+  port: number,
+  fn: ManageClusterFunction
+) {
+  if (cluster.isPrimary) {
+    const numCpus = cpus().length;
+    for (let i = 0; i < numCpus; i++) {
+      cluster.fork();
+    }
+    fn(cluster);
+  } else {
+    createServer(listener).listen(port);
+  }
 }
 
 export class PayloadTooLargeError extends Error {

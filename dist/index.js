@@ -1,3 +1,6 @@
+import { createServer, } from "http";
+import { cpus } from "os";
+import cluster from "cluster";
 /**
  * Returns a router {@link Handler} that can be passed to {@link makeListener}. Can optionally be wrapped with middleware.
  * @throws `never`
@@ -24,6 +27,18 @@ export function makeListener(router) {
         w.statusCode = ctx.status || 200;
         w.end(ctx.reply);
     };
+}
+export function listen(listener, port, fn) {
+    if (cluster.isPrimary) {
+        const numCpus = cpus().length;
+        for (let i = 0; i < numCpus; i++) {
+            cluster.fork();
+        }
+        fn(cluster);
+    }
+    else {
+        createServer(listener).listen(port);
+    }
 }
 export class PayloadTooLargeError extends Error {
     constructor() {

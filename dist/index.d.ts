@@ -1,11 +1,12 @@
 /// <reference types="node" />
-import http from "http";
+import { IncomingMessage, ServerResponse, RequestListener } from "http";
+import { Cluster } from "cluster";
 export interface Context {
     status?: number;
     reply?: Buffer | Uint8Array | string;
     cookies: string[];
-    r: http.IncomingMessage;
-    w: http.ServerResponse;
+    r: IncomingMessage;
+    w: ServerResponse;
 }
 export interface Handler {
     (ctx: Context): Promise<void>;
@@ -26,7 +27,11 @@ export declare function makeRouter(handlers: Handlers): Handler;
  * Accepts a router, router wrapped with middleware, or any {@link Handler}, and returns an {@link http.RequestListener}.
  * @throws `never`
  */
-export declare function makeListener(router: Handler): http.RequestListener;
+export declare function makeListener(router: Handler): RequestListener;
+interface ManageClusterFunction {
+    (cluster: Cluster): void;
+}
+export declare function listen(listener: RequestListener, port: number, fn: ManageClusterFunction): void;
 export declare class PayloadTooLargeError extends Error {
     constructor();
 }
@@ -38,3 +43,4 @@ export declare class PayloadTooLargeError extends Error {
 export declare function read(ctx: Context, options?: {
     maxBytes: number;
 }): Promise<Buffer>;
+export {};
