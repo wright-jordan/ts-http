@@ -5,6 +5,7 @@ import {
   createServer,
 } from "http";
 import cluster, { Cluster } from "cluster";
+import { cpus } from "os";
 
 export interface Context {
   status?: number;
@@ -58,20 +59,28 @@ export function makeListener(router: Handler): RequestListener {
   };
 }
 
+/**
+ * Starts server. Uses {@link cluster} module to create separate processes if `threadCount > 1`. Default `threadCount` is number of cpus.
+ */
 export function listenHTTP(
   listener: RequestListener,
-  port: number,
-  threadCount: number,
+  port: bigint = 8080n,
+  threadCount: bigint = BigInt(cpus().length),
   fn?: (cluster: Cluster) => void,
-  listenerCallback: () => void = () => {}
+  listenerCallback?: () => void
 ) {
+  if (threadCount === 1n) {
+    createServer(listener).listen(port, listenerCallback);
+    return;
+  }
+
   if (cluster.isPrimary) {
     for (let i = 0; i < threadCount; i++) {
       cluster.fork();
     }
     fn && fn(cluster);
   } else {
-    createServer(listener).listen(port, listenerCallback);
+    createServer(listener).listen(Number(port), listenerCallback);
   }
 }
 

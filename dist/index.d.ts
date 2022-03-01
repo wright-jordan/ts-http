@@ -28,7 +28,10 @@ export declare function makeRouter(handlers: Handlers): Handler;
  * @throws `never`
  */
 export declare function makeListener(router: Handler): RequestListener;
-export declare function listenHTTP(listener: RequestListener, port: number, threadCount: number, fn?: (cluster: Cluster) => void, listenerCallback?: () => void): void;
+/**
+ * Starts server. Uses {@link cluster} module to create separate processes if `threadCount > 1`. Default `threadCount` is number of cpus.
+ */
+export declare function listenHTTP(listener: RequestListener, port?: bigint, threadCount?: bigint, fn?: (cluster: Cluster) => void, listenerCallback?: () => void): void;
 export declare class PayloadTooLargeError extends Error {
     constructor();
 }

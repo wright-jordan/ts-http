@@ -1,5 +1,6 @@
 import { createServer, } from "http";
 import cluster from "cluster";
+import { cpus } from "os";
 /**
  * Returns a router {@link Handler} that can be passed to {@link makeListener}. Can optionally be wrapped with middleware.
  * @throws `never`
@@ -27,7 +28,14 @@ export function makeListener(router) {
         w.end(ctx.reply);
     };
 }
-export function listenHTTP(listener, port, threadCount, fn, listenerCallback = () => { }) {
+/**
+ * Starts server. Uses {@link cluster} module to create separate processes if `threadCount > 1`. Default `threadCount` is number of cpus.
+ */
+export function listenHTTP(listener, port = 8080n, threadCount = BigInt(cpus().length), fn, listenerCallback) {
+    if (threadCount === 1n) {
+        createServer(listener).listen(port, listenerCallback);
+        return;
+    }
     if (cluster.isPrimary) {
         for (let i = 0; i < threadCount; i++) {
             cluster.fork();
@@ -35,7 +43,7 @@ export function listenHTTP(listener, port, threadCount, fn, listenerCallback = (
         fn && fn(cluster);
     }
     else {
-        createServer(listener).listen(port, listenerCallback);
+        createServer(listener).listen(Number(port), listenerCallback);
     }
 }
 export class PayloadTooLargeError extends Error {
