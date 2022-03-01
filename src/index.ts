@@ -58,22 +58,20 @@ export function makeListener(router: Handler): RequestListener {
   };
 }
 
-interface ManageClusterFunction {
-  (cluster: Cluster): void;
-}
 export function listenHTTP(
   listener: RequestListener,
   port: number,
   threadCount: number,
-  fn: ManageClusterFunction
+  fn?: (cluster: Cluster) => void,
+  listenerCallback: () => void = () => {}
 ) {
   if (cluster.isPrimary) {
     for (let i = 0; i < threadCount; i++) {
       cluster.fork();
     }
-    fn(cluster);
+    fn && fn(cluster);
   } else {
-    createServer(listener).listen(port);
+    createServer(listener).listen(port, listenerCallback);
   }
 }
 

@@ -6,8 +6,9 @@ import {
   Middleware,
   PayloadTooLargeError,
   read,
+  listenHTTP,
 } from "ts-http";
-import http from "http";
+import { cpus } from "os";
 
 declare module "ts-http" {
   interface Context {
@@ -55,7 +56,19 @@ const useAnotherMiddleware: Middleware = function useAnotherMiddleware(next) {
 };
 
 const router = makeRouter(handlers);
-const app = useMiddleware(useAnotherMiddleware(router));
-const listener = makeListener(app);
+const wrappedRouter = useMiddleware(useAnotherMiddleware(router));
+const listener = makeListener(wrappedRouter);
 
-http.createServer(listener).listen(8080);
+listenHTTP(
+  listener,
+  8080,
+  cpus().length,
+  (cluster) => {
+    cluster.on("exit", (worker) => {
+      console.log(`worker ${worker.process.pid} died`);
+    });
+  },
+  () => {
+    `worker ${process.pid} started`;
+  }
+);
