@@ -31,7 +31,16 @@ export function makeListener(router) {
 /**
  * Starts server. Uses {@link cluster} module to create separate processes if `threadCount > 1`. Default `threadCount` is number of cpus.
  */
-export function listenHTTP(listener, port = 8080n, threadCount = BigInt(cpus().length), fn, listenerCallback) {
+export function listenHTTP(listener, port = 8080n, threadCount = BigInt(cpus().length), fn = (cluster) => {
+    cluster.on("exit", (worker) => {
+        console.log(`worker ${worker.process.pid} died`);
+    });
+}, listenerCallback = () => {
+    if (threadCount > 1n) {
+        `worker ${process.pid} started`;
+        return;
+    }
+}) {
     if (threadCount === 1n) {
         createServer(listener).listen(port, listenerCallback);
         return;
@@ -40,7 +49,7 @@ export function listenHTTP(listener, port = 8080n, threadCount = BigInt(cpus().l
         for (let i = 0; i < threadCount; i++) {
             cluster.fork();
         }
-        fn && fn(cluster);
+        fn(cluster);
     }
     else {
         createServer(listener).listen(Number(port), listenerCallback);
