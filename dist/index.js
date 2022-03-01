@@ -27,15 +27,15 @@ export function makeListener(router) {
         w.end(ctx.reply);
     };
 }
-export function listenHTTP(listener, port, threadCount, fn) {
+export function listenHTTP(listener, port, threadCount, fn, listenerCallback = () => { }) {
     if (cluster.isPrimary) {
         for (let i = 0; i < threadCount; i++) {
             cluster.fork();
         }
-        fn(cluster);
+        fn && fn(cluster);
     }
     else {
-        createServer(listener).listen(port);
+        createServer(listener).listen(port, listenerCallback);
     }
 }
 export class PayloadTooLargeError extends Error {

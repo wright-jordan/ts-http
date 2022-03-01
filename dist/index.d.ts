@@ -28,10 +28,7 @@ export declare function makeRouter(handlers: Handlers): Handler;
  * @throws `never`
  */
 export declare function makeListener(router: Handler): RequestListener;
-interface ManageClusterFunction {
-    (cluster: Cluster): void;
-}
-export declare function listenHTTP(listener: RequestListener, port: number, threadCount: number, fn: ManageClusterFunction): void;
+export declare function listenHTTP(listener: RequestListener, port: number, threadCount: number, fn?: (cluster: Cluster) => void, listenerCallback?: () => void): void;
 export declare class PayloadTooLargeError extends Error {
     constructor();
 }
@@ -43,4 +40,3 @@ export declare class PayloadTooLargeError extends Error {
 export declare function read(ctx: Context, options?: {
     maxBytes: number;
 }): Promise<Buffer>;
-export {};
