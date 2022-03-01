@@ -66,8 +66,17 @@ export function listenHTTP(
   listener: RequestListener,
   port: bigint = 8080n,
   threadCount: bigint = BigInt(cpus().length),
-  fn?: (cluster: Cluster) => void,
-  listenerCallback?: () => void
+  fn: (cluster: Cluster) => void = (cluster) => {
+    cluster.on("exit", (worker) => {
+      console.log(`worker ${worker.process.pid} died`);
+    });
+  },
+  listenerCallback: () => void = () => {
+    if (threadCount > 1n) {
+      `worker ${process.pid} started`;
+      return;
+    }
+  }
 ) {
   if (threadCount === 1n) {
     createServer(listener).listen(port, listenerCallback);
@@ -78,7 +87,7 @@ export function listenHTTP(
     for (let i = 0; i < threadCount; i++) {
       cluster.fork();
     }
-    fn && fn(cluster);
+    fn(cluster);
   } else {
     createServer(listener).listen(Number(port), listenerCallback);
   }

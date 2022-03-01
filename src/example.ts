@@ -8,7 +8,6 @@ import {
   read,
   listenHTTP,
 } from "ts-http";
-import { cpus } from "os";
 
 declare module "ts-http" {
   interface Context {
@@ -59,16 +58,4 @@ const router = makeRouter(handlers);
 const wrappedRouter = useMiddleware(useAnotherMiddleware(router));
 const listener = makeListener(wrappedRouter);
 
-listenHTTP(
-  listener,
-  8080,
-  cpus().length,
-  (cluster) => {
-    cluster.on("exit", (worker) => {
-      console.log(`worker ${worker.process.pid} died`);
-    });
-  },
-  () => {
-    `worker ${process.pid} started`;
-  }
-);
+listenHTTP(listener);
