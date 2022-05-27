@@ -49,7 +49,7 @@ const useAnotherMiddleware: Middleware = function useAnotherMiddleware(next) {
   return async function anotherMiddleware(ctx) {
     console.log("runs second");
     await next(ctx);
-    console.log("runds third");
+    console.log("runs third");
     console.log(ctx.msg);
   };
 };
