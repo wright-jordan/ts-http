@@ -1,4 +1,6 @@
 /// <reference types="node" />
+/// <reference types="node" />
+/// <reference types="node" />
 import { IncomingMessage, ServerResponse, RequestListener } from "http";
 import { Cluster } from "cluster";
 export interface Context {
