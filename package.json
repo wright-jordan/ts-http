@@ -7,9 +7,9 @@
   },
   "type": "module",
   "devDependencies": {
-    "@tsconfig/strictest": "^2",
-    "@types/node": "^18",
+    "@tsconfig/strictest": "^2.0.0",
+    "@types/node": "^18.0.0",
     "prettier": "2.8.7",
-    "typescript": "^5"
+    "typescript": "^5.0.0"
   }
 }
